@@ -16,12 +16,44 @@ export const metadata = {
   },
 };
 
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Pascare',
+  url: 'https://pascare.tech',
+  logo: 'https://pascare.tech/og.png',
+  image: 'https://pascare.tech/og.png',
+  email: 'pascare.tech@gmail.com',
+  description:
+    'Software, infraestructura, redes, ciberseguridad e innovación para organizaciones que quieren crecer con tecnología confiable.',
+  areaServed: { '@type': 'Country', name: 'Perú' },
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      telephone: '+51935162223',
+      contactType: 'customer service',
+      availableLanguage: ['es'],
+    },
+    {
+      '@type': 'ContactPoint',
+      telephone: '+51982434097',
+      contactType: 'sales',
+      availableLanguage: ['es'],
+    },
+  ],
+  // sameAs: pendiente — añadir URLs de LinkedIn, Facebook e Instagram cuando existan.
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon-pascare-v2.svg?v=20260721-2" />
         <link rel="shortcut icon" href="/favicon-pascare-v2.svg?v=20260721-2" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
       </head>
       <body>
         <Header />

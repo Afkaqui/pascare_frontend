@@ -4,7 +4,7 @@ import ProjectCaseVisual from '../../components/ProjectCaseVisual';
 import Reveal from '../../components/Reveal';
 import {projects} from '../../lib/content';
 
-export const metadata={title:'Proyectos'};
+export const metadata={title:'Proyectos',description:'Casos y resultados de Pascare en software, infraestructura y redes: proyectos que reducen costos, mejoran la disponibilidad y escalan la operación.',alternates:{canonical:'/proyectos'}};
 
 export default function Proyectos(){
   return <>

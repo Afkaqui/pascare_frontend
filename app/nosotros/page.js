@@ -25,7 +25,7 @@ import PageHero from '../../components/PageHero';
 import Reveal from '../../components/Reveal';
 import {process} from '../../lib/content';
 
-export const metadata={title:'Nosotros'};
+export const metadata={title:'Nosotros',description:'Conoce a Pascare: cómo trabajamos, nuestros principios y el enfoque con que resolvemos retos tecnológicos para organizaciones en Perú.',alternates:{canonical:'/nosotros'}};
 
 const principles=[
   {number:'01',tone:'violet',Icon:Focus,title:'Claridad antes que complejidad',description:'Las mejores soluciones se pueden explicar, medir y mantener.'},

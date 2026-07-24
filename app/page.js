@@ -4,6 +4,10 @@ import ServiceCard from '../components/ServiceCard';
 import HomeProjectShowcase from '../components/HomeProjectShowcase';
 import { services, projects } from '../lib/content';
 
+export const metadata = {
+  alternates: { canonical: '/' },
+};
+
 export default function Home() {
   return (
     <>
