@@ -19,7 +19,7 @@ Este cert sirve tanto para `pascare.tech` como para `api.pascare.tech`.
 ## 2. Código y build
 
 ```bash
-cd ~ && git clone <URL_REPO> pascare-frontend && cd pascare-frontend
+cd ~ && git clone https://github.com/Afkaqui/pascare_frontend.git pascare-frontend && cd pascare-frontend
 cp .env.example .env && nano .env
 #   NEXT_PUBLIC_API_URL=https://api.pascare.tech/api
 docker compose up -d --build
