@@ -2,6 +2,7 @@ import './globals.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PageMotion from '../components/PageMotion';
+import ViewTracker from '../components/ViewTracker';
 
 export const metadata = {
   metadataBase: new URL('https://pascare.tech'),
@@ -53,6 +54,7 @@ export default function RootLayout({ children }) {
       <body>
         <Header />
         <PageMotion />
+        <ViewTracker />
         <main>{children}</main>
         <Footer />
       </body>
