@@ -108,6 +108,175 @@ function RequestCard({ item, kind, onStatus }) {
   );
 }
 
+/* ---------- Usuarios ---------- */
+const ACTION_LABELS = {
+  'login.success': 'Inicio de sesión',
+  'login.failed': 'Intento fallido',
+  'user.create': 'Creó usuario',
+  'user.update': 'Actualizó usuario',
+  'quote.status': 'Cambió estado de cotización',
+  'contact.status': 'Cambió estado de mensaje',
+  'export.quotes': 'Exportó cotizaciones',
+  'export.contacts': 'Exportó mensajes',
+};
+
+function UsersPanel({ currentEmail, onError }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ email: '', name: '', password: '' });
+  const [creating, setCreating] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    apiFetch('/admin/users')
+      .then((d) => setUsers(d || []))
+      .catch(onError)
+      .finally(() => setLoading(false));
+  }, [onError]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function createUser(event) {
+    event.preventDefault();
+    setCreating(true);
+    setMsg('');
+    try {
+      await apiFetch('/admin/users', { method: 'POST', body: JSON.stringify(form) });
+      setForm({ email: '', name: '', password: '' });
+      setMsg('Usuario creado.');
+      load();
+    } catch (err) {
+      setMsg(err.message);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function toggleActive(user) {
+    try {
+      await apiFetch(`/admin/users/${user.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ active: !user.active }),
+      });
+      load();
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
+
+  async function resetPassword(user) {
+    const password = prompt(`Nueva contraseña para ${user.email} (mínimo 10 caracteres):`);
+    if (!password) return;
+    try {
+      await apiFetch(`/admin/users/${user.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ password }),
+      });
+      setMsg(`Contraseña actualizada para ${user.email}.`);
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
+
+  return (
+    <>
+      <form className="in-card in-newuser" onSubmit={createUser}>
+        <h3>Nuevo usuario</h3>
+        <div className="in-newuser-grid">
+          <label className="in-field">
+            <span>Correo</span>
+            <input type="email" value={form.email} required
+              onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </label>
+          <label className="in-field">
+            <span>Nombre</span>
+            <input value={form.name} required
+              onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </label>
+          <label className="in-field">
+            <span>Contraseña (mín. 10)</span>
+            <input type="password" value={form.password} required minLength={10}
+              autoComplete="new-password"
+              onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          </label>
+          <button className="in-btn in-btn-inline" disabled={creating}>
+            {creating ? 'Creando…' : 'Crear usuario'}
+          </button>
+        </div>
+        {msg && <div className="in-note">{msg}</div>}
+      </form>
+
+      {loading ? (
+        <div className="in-loading">Cargando…</div>
+      ) : (
+        <table className="in-table">
+          <thead>
+            <tr><th>Usuario</th><th>Correo</th><th>Último acceso</th><th>Estado</th><th></th></tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>{u.name}{u.email === currentEmail && <em className="in-you"> (tú)</em>}</td>
+                <td>{u.email}</td>
+                <td>{u.lastLoginAt ? formatDate(u.lastLoginAt) : '—'}</td>
+                <td><span className={`in-badge ${u.active ? 'done' : 'archived'}`}>{u.active ? 'Activo' : 'Inactivo'}</span></td>
+                <td className="in-row-actions">
+                  <button className="in-export" onClick={() => resetPassword(u)}>Cambiar clave</button>
+                  {u.email !== currentEmail && (
+                    <button className="in-export" onClick={() => toggleActive(u)}>
+                      {u.active ? 'Desactivar' : 'Activar'}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}
+
+/* ---------- Registro de actividad ---------- */
+function LogsPanel({ onError }) {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiFetch('/admin/logs?limit=200')
+      .then((d) => setLogs(d || []))
+      .catch(onError)
+      .finally(() => setLoading(false));
+  }, [onError]);
+
+  if (loading) return <div className="in-loading">Cargando…</div>;
+  if (logs.length === 0) return <div className="in-empty">Aún no hay actividad registrada.</div>;
+
+  return (
+    <table className="in-table">
+      <thead>
+        <tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th><th>IP</th></tr>
+      </thead>
+      <tbody>
+        {logs.map((l) => (
+          <tr key={l.id}>
+            <td>{formatDate(l.createdAt)}</td>
+            <td>{l.userEmail || '—'}</td>
+            <td>
+              <span className={`in-badge ${l.action === 'login.failed' ? 'new' : 'done'}`}>
+                {ACTION_LABELS[l.action] || l.action}
+              </span>
+            </td>
+            <td>{l.detail || '—'}</td>
+            <td className="in-ip">{l.ip || '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 /* ---------- Panel ---------- */
 function Dashboard({ user, onLogout }) {
   const [tab, setTab] = useState('quotes');
@@ -128,7 +297,8 @@ function Dashboard({ user, onLogout }) {
   useEffect(() => { loadStats(); }, [loadStats]);
 
   useEffect(() => {
-    if (tab === 'views') { setLoading(false); return; }
+    // Estas pestañas cargan sus propios datos.
+    if (tab === 'views' || tab === 'users' || tab === 'logs') { setLoading(false); return; }
     setLoading(true);
     setError('');
     apiFetch(`/admin/${tab}`)
@@ -193,11 +363,17 @@ function Dashboard({ user, onLogout }) {
           <button className={`in-tab ${tab === 'quotes' ? 'active' : ''}`} onClick={() => setTab('quotes')}>Cotizaciones</button>
           <button className={`in-tab ${tab === 'contacts' ? 'active' : ''}`} onClick={() => setTab('contacts')}>Mensajes</button>
           <button className={`in-tab ${tab === 'views' ? 'active' : ''}`} onClick={() => setTab('views')}>Visitas</button>
+          <button className={`in-tab ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>Usuarios</button>
+          <button className={`in-tab ${tab === 'logs' ? 'active' : ''}`} onClick={() => setTab('logs')}>Registro</button>
         </nav>
 
         {error && <div className="in-error">{error}</div>}
 
-        {tab === 'views' ? (
+        {tab === 'users' ? (
+          <UsersPanel currentEmail={user?.email} onError={handleError} />
+        ) : tab === 'logs' ? (
+          <LogsPanel onError={handleError} />
+        ) : tab === 'views' ? (
           <table className="in-table">
             <thead><tr><th>Página</th><th>Visitas</th><th>Última visita</th></tr></thead>
             <tbody>
