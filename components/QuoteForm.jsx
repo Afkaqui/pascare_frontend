@@ -36,7 +36,7 @@ export default function QuoteForm(){
     try{
       const response=await fetch(apiUrl('/quotes'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
       const data=await response.json();
-      if(!response.ok)throw new Error(data.error||'No pudimos registrar la solicitud.');
+      if(!response.ok)throw new Error(data.message||data.error||'No pudimos registrar la solicitud.');
       setState({status:'success',message:`Solicitud ${data.reference} registrada. Te contactaremos pronto.`});
       setForm(initial);
     }catch(error){setState({status:'error',message:error.message})}
