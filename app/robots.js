@@ -3,6 +3,7 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: '/intranet',
     },
     sitemap: 'https://pascare.tech/sitemap.xml',
     host: 'https://pascare.tech',

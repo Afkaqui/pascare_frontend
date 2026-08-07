@@ -8,7 +8,8 @@ import { apiUrl } from '../lib/api';
 export default function ViewTracker() {
   const pathname = usePathname();
   useEffect(() => {
-    if (!pathname) return;
+    // La intranet es uso interno: no cuenta como visita del sitio público.
+    if (!pathname || pathname.startsWith('/intranet')) return;
     const key = `pv:${pathname}`;
     try {
       if (sessionStorage.getItem(key)) return;
